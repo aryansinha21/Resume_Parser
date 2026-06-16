@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - AI Resume Parser</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg app-nav border-bottom">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">AI Resume Parser</a>
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+            <a href="{{ url_for('history') }}" class="btn btn-outline-secondary btn-sm">History</a>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary btn-sm">Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+            <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Dark mode</button>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4 py-lg-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="dashboard-heading">
+        <div>
+            <p class="eyebrow text-primary">Welcome, {{ user.username }}</p>
+            <h1 class="h2 fw-bold mb-1">Resume dashboard</h1>
+            <p class="text-body-secondary mb-0">Parse resumes, review scores, and track candidate history.</p>
+        </div>
+    </div>
+
+    <section class="stats-grid my-4">
+        <div class="glass-panel stat-panel"><span>Total resumes</span><strong>{{ stats.total_resumes }}</strong></div>
+        <div class="glass-panel stat-panel"><span>Average score</span><strong>{{ stats.average_score }}</strong></div>
+        <div class="glass-panel stat-panel"><span>Best score</span><strong>{{ stats.best_score }}</strong></div>
+        <div class="glass-panel stat-panel"><span>Latest score</span><strong>{{ stats.latest_score }}</strong></div>
+    </section>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <form id="uploadForm" class="glass-panel upload-card" method="post" enctype="multipart/form-data">
+                <h2 class="h5 fw-bold mb-3">Upload PDF resume</h2>
+                <label for="resume" class="form-label fw-semibold">Resume file</label>
+                <input class="form-control form-control-lg" type="file" id="resume" name="resume" accept=".pdf" required>
+                <div class="form-text">PDF only. Maximum file size: 8 MB.</div>
+                <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">
+                    <span class="button-label">Parse Resume</span>
+                    <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                </button>
+                <div id="loadingText" class="loading-copy d-none mt-3">Extracting PDF text and scoring resume...</div>
+            </form>
+        </div>
+        <div class="col-lg-7">
+            <section class="glass-panel chart-panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0">Score trend</h2>
+                    <span class="badge text-bg-primary">{{ rankings|length }} recent</span>
+                </div>
+                <canvas id="scoreChart" height="210"
+                        data-labels='{{ stats.chart_labels|tojson }}'
+                        data-scores='{{ stats.chart_scores|tojson }}'></canvas>
+            </section>
+        </div>
+    </div>
+
+    <section class="mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Top ranked resumes</h2>
+            <a class="btn btn-outline-primary btn-sm" href="{{ url_for('history') }}">View all</a>
+        </div>
+        {% if rankings %}
+            <div class="table-responsive glass-panel table-panel">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr><th>Rank</th><th>Candidate</th><th>File</th><th>Score</th><th>Parsed</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                    {% for item in rankings %}
+                        <tr>
+                            <td class="fw-semibold">#{{ item.rank }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.filename }}</td>
+                            <td><span class="score-pill">{{ item.score }}/100</span></td>
+                            <td>{{ item.created_at }}</td>
+                            <td><a class="btn btn-outline-primary btn-sm" href="{{ url_for('result', resume_id=item.id) }}">View</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="glass-panel empty-state">No resumes parsed yet. Upload a PDF to start ranking candidates.</div>
+        {% endif %}
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

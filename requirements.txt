@@ -1,0 +1,6 @@
+Flask>=3.0,<4
+Flask-Login>=0.6,<1
+pdfplumber>=0.11,<1
+Werkzeug>=3.0,<4
+PyJWT>=2.8,<3
+waitress>=3.0,<4

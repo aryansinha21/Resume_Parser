@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Parsed Resume - AI Resume Parser</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg app-nav border-bottom">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">AI Resume Parser</a>
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-sm">Upload another</a>
+            <a href="{{ url_for('history') }}" class="btn btn-outline-secondary btn-sm">History</a>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary btn-sm">Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+            <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button">Dark mode</button>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4 py-lg-5">
+    <div class="result-header mb-4">
+        <div>
+            <p class="eyebrow text-primary">{{ filename }}</p>
+            <h1 class="h2 fw-bold mb-1">{{ parsed.full_name or "Unknown Candidate" }}</h1>
+            <p class="text-body-secondary mb-0">
+                {{ parsed.email or "No email found" }}{% if parsed.phone %} · {{ parsed.phone }}{% endif %}
+            </p>
+        </div>
+        <div class="score-card">
+            <div class="score-number">{{ parsed.score.total }}</div>
+            <div class="score-label">/100 · {{ parsed.ranking_label }}</div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-success" href="{{ url_for('download_json', resume_id=resume_id) }}">Download JSON</a>
+        <a class="btn btn-outline-success" href="{{ url_for('download_csv', resume_id=resume_id) }}">Download CSV</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <section class="glass-panel content-panel mb-4">
+                <h2 class="h5 mb-3">Matched skills</h2>
+                {% if parsed.skills %}
+                    <div class="skill-cloud">
+                        {% for skill in parsed.skills %}
+                            <span class="skill-badge">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-body-secondary mb-0">No predefined skills were matched.</p>
+                {% endif %}
+            </section>
+
+            <section class="glass-panel content-panel mb-4">
+                <h2 class="h5 mb-3">Education</h2>
+                {% if parsed.education %}
+                    <ul class="clean-list">
+                        {% for item in parsed.education %}<li>{{ item }}</li>{% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-body-secondary mb-0">No education details detected.</p>
+                {% endif %}
+            </section>
+
+            <section class="glass-panel content-panel mb-4">
+                <h2 class="h5 mb-3">Work experience</h2>
+                {% if parsed.experience %}
+                    <ul class="clean-list">
+                        {% for item in parsed.experience %}<li>{{ item }}</li>{% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-body-secondary mb-0">No work experience details detected.</p>
+                {% endif %}
+            </section>
+
+            <section class="glass-panel content-panel">
+                <h2 class="h5 mb-3">Certifications</h2>
+                {% if parsed.certifications %}
+                    <ul class="clean-list">
+                        {% for item in parsed.certifications %}<li>{{ item }}</li>{% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-body-secondary mb-0">No certifications detected.</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="col-lg-4">
+            <section class="glass-panel content-panel mb-4">
+                <h2 class="h5 mb-3">Score breakdown</h2>
+                {% for label, value in parsed.score.breakdown.items() %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small text-capitalize">
+                            <span>{{ label }}</span>
+                            <span>{{ value }}</span>
+                        </div>
+                        <div class="progress" role="progressbar" aria-label="{{ label }}">
+                            <div class="progress-bar" style="width: {{ value }}%"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+
+            <section class="glass-panel content-panel mb-4">
+                <h2 class="h5 mb-3">AI suggestions</h2>
+                <ul class="clean-list">
+                    {% for item in parsed.recommendations %}<li>{{ item }}</li>{% endfor %}
+                </ul>
+            </section>
+
+            <section class="glass-panel content-panel">
+                <h2 class="h5 mb-3">Top ranked</h2>
+                {% for item in rankings[:5] %}
+                    <a class="ranking-link" href="{{ url_for('result', resume_id=item.id) }}">
+                        <span>#{{ item.rank }} {{ item.name }}</span>
+                        <strong>{{ item.score }}</strong>
+                    </a>
+                {% endfor %}
+            </section>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
