@@ -73,13 +73,14 @@ Recommended Render settings if creating the service manually:
 ```text
 Environment: Python
 Build command: pip install -r requirements.txt
-Start command: waitress-serve --host=0.0.0.0 --port=$PORT wsgi:app
+Start command: python -m waitress --host=0.0.0.0 --port=$PORT wsgi:app
 ```
 
 Environment variables:
 
 ```text
 SECRET_KEY=<generate a long random value>
+PYTHON_VERSION=3.14
 FLASK_DEBUG=0
 SESSION_COOKIE_SECURE=1
 ```

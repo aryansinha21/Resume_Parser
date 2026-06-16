@@ -3,13 +3,14 @@ services:
     name: ai-resume-parser
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: waitress-serve --host=0.0.0.0 --port=$PORT wsgi:app
+    buildCommand: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+    startCommand: python -m waitress --host=0.0.0.0 --port=$PORT wsgi:app
     envVars:
       - key: SECRET_KEY
         generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.14"
       - key: FLASK_DEBUG
         value: "0"
       - key: SESSION_COOKIE_SECURE
         value: "1"
-
