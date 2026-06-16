@@ -62,6 +62,28 @@ Open:
 http://127.0.0.1:5000
 ```
 
+## Deploy
+
+This repository includes `render.yaml`, `Procfile`, and `wsgi.py` for production deployment.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/aryansinha21/Resume_Parser)
+
+Recommended Render settings if creating the service manually:
+
+```text
+Environment: Python
+Build command: pip install -r requirements.txt
+Start command: waitress-serve --host=0.0.0.0 --port=$PORT wsgi:app
+```
+
+Environment variables:
+
+```text
+SECRET_KEY=<generate a long random value>
+FLASK_DEBUG=0
+SESSION_COOKIE_SECURE=1
+```
+
 For Python launchers without `py -3.14`, use:
 
 ```powershell
